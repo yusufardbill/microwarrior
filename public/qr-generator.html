@@ -47,7 +47,7 @@
       color: #555;
       margin-bottom: 0.35rem;
     }
-    input[type=text], select, textarea {
+    input[type=text], input[type=date], select, textarea {
       width: 100%;
       padding: 0.625rem 0.875rem;
       border: 1.5px solid rgba(0,0,0,0.12);
@@ -60,7 +60,7 @@
       margin-bottom: 1rem;
       transition: border-color 0.15s;
     }
-    input[type=text]:focus, select:focus { border-color: #2d6a2d; }
+    input[type=text]:focus, input[type=date]:focus, select:focus { border-color: #2d6a2d; }
     .url-preview {
       padding: 0.75rem 1rem;
       background: #f4f9f0;
@@ -191,24 +191,24 @@
     <div class="card">
       <h2>Konfigurasi URL</h2>
       <label>Base URL website kamu</label>
-      <input type="text" id="base-url" placeholder="https://ucops.id" value="https://ucops.id" />
-      <label>Path halaman produk</label>
-      <input type="text" id="path" value="/microgreens/" />
+      <input type="text" id="base-url" placeholder="https://yusufardbill.github.io/microwarrior" value="https://yusufardbill.github.io/microwarrior" />
     </div>
 
     <div class="card">
-      <h2>Generate QR — Dari Daftar Produk</h2>
-      <div id="products-list" class="products-list">
-        <div class="loading-state">⏳ Memuat data produk…</div>
+      <h2>Generate QR — Batch Aktif</h2>
+      <div id="batches-list" class="products-list">
+        <div class="loading-state">⏳ Memuat data batch…</div>
       </div>
     </div>
 
     <div class="card">
-      <h2>Generate QR — Manual</h2>
-      <label>Nama produk (untuk label)</label>
-      <input type="text" id="manual-name" placeholder="Sunflower Microgreens" />
-      <label>Slug / kode produk</label>
-      <input type="text" id="manual-slug" placeholder="sunflower" oninput="updatePreview()" />
+      <h2>Generate QR — Batch Baru</h2>
+      <label>Produk</label>
+      <select id="manual-product" onchange="onProductChange()">
+        <option value="">— Pilih produk —</option>
+      </select>
+      <label>Tanggal tanam</label>
+      <input type="date" id="manual-date" oninput="updatePreview()" />
       <div class="url-preview" id="url-preview">—</div>
       <button class="btn" onclick="generateManual()">⚡ Generate QR</button>
     </div>
@@ -241,26 +241,43 @@
   <div class="print-sheet" id="print-sheet"></div>
 
   <script>
-    const DATA_URL = '../data/products.json';
-    let currentProducts = [];
+    const CONFIG_URL = 'data/config.json';
+    const INDEX_URL = 'data/index.json';
+    let allProducts = {};
+    let currentBatches = [];
     let lastQRUrl = '';
     let lastQRName = '';
 
     function getBaseUrl() {
       return (document.getElementById('base-url').value || '').replace(/\/$/, '');
     }
-    function getPath() {
-      const p = document.getElementById('path').value || '/';
-      return p.endsWith('/') ? p : p + '/';
+    function buildUrl(batchId) {
+      return getBaseUrl() + '?p=' + batchId;
     }
-    function buildUrl(slug) {
-      return getBaseUrl() + '?p=' + slug;
+
+    function dateToSlug(dateStr) {
+      return dateStr.replace(/-/g, '');
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '';
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+
+    function onProductChange() {
+      updatePreview();
     }
 
     function updatePreview() {
-      const slug = document.getElementById('manual-slug').value.trim();
-      const url = slug ? buildUrl(slug) : '—';
-      document.getElementById('url-preview').textContent = url;
+      const productSlug = document.getElementById('manual-product').value;
+      const dateVal = document.getElementById('manual-date').value;
+      if (!productSlug || !dateVal) {
+        document.getElementById('url-preview').textContent = '—';
+        return;
+      }
+      const batchId = productSlug + '_' + dateToSlug(dateVal);
+      document.getElementById('url-preview').textContent = buildUrl(batchId);
     }
 
     function renderQR(container, url, size = 220) {
@@ -288,10 +305,18 @@
     }
 
     function generateManual() {
-      const name = document.getElementById('manual-name').value.trim() || 'Produk';
-      const slug = document.getElementById('manual-slug').value.trim();
-      if (!slug) return alert('Masukkan slug produk dulu');
-      showResult(name, buildUrl(slug));
+      const productSlug = document.getElementById('manual-product').value;
+      const dateVal = document.getElementById('manual-date').value;
+      if (!productSlug) return alert('Pilih produk dulu');
+      if (!dateVal) return alert('Isi tanggal tanam dulu');
+      const product = allProducts[productSlug];
+      const batchId = productSlug + '_' + dateToSlug(dateVal);
+      const label = (product ? product.emoji + ' ' + product.name : productSlug) + ' · ' + formatDate(dateVal);
+      showResult(label, buildUrl(batchId));
+    }
+
+    function generateFromBatch(batchId, label) {
+      showResult(label, buildUrl(batchId));
     }
 
     function downloadQR() {
@@ -299,7 +324,7 @@
         const canvas = document.querySelector('#qr-canvas canvas');
         if (!canvas) return alert('QR belum di-generate');
         const link = document.createElement('a');
-        link.download = `qr-${lastQRName.toLowerCase().replace(/\s+/g, '-')}.png`;
+        link.download = `qr-${lastQRName.toLowerCase().replace(/[\s·]+/g, '-')}.png`;
         link.href = canvas.toDataURL('image/png');
         link.click();
       }, 100);
@@ -311,65 +336,80 @@
         .catch(() => prompt('Copy URL ini:', lastQRUrl));
     }
 
-    async function loadProducts() {
-      const list = document.getElementById('products-list');
+    async function loadData() {
       try {
-        const res = await fetch(DATA_URL);
-        const data = await res.json();
-        currentProducts = data.products || [];
+        const [configRes, indexRes] = await Promise.all([
+          fetch(CONFIG_URL),
+          fetch(INDEX_URL)
+        ]);
+        const config = await configRes.json();
+        const indexData = await indexRes.json();
 
-        if (!currentProducts.length) {
-          list.innerHTML = '<div class="loading-state">Tidak ada produk ditemukan di products.json</div>';
-          return;
-        }
+        allProducts = config.products || {};
+        currentBatches = indexData.batches || [];
 
-        list.innerHTML = currentProducts.map(p => `
-          <div class="product-row">
-            <div class="product-row-info">
-              <span class="product-row-emoji">${p.emoji}</span>
-              <div>
-                <p class="product-row-name">${p.name}</p>
-                <p class="product-row-slug">${buildUrl(p.slug)}</p>
-              </div>
-            </div>
-            <button class="btn btn-sm" onclick="generateFromProduct('${p.slug}', '${p.name}')">QR</button>
-          </div>
-        `).join('');
-
-        document.getElementById('bulk-card').style.display = '';
+        populateProductDropdown();
+        renderBatchList();
       } catch (e) {
-        list.innerHTML = '<div class="loading-state">⚠️ Gagal load products.json — pastikan server berjalan</div>';
+        document.getElementById('batches-list').innerHTML =
+          '<div class="loading-state">⚠️ Gagal load data — pastikan server berjalan</div>';
       }
     }
 
-    function generateFromProduct(slug, name) {
-      showResult(name, buildUrl(slug));
+    function populateProductDropdown() {
+      const select = document.getElementById('manual-product');
+      const options = Object.values(allProducts).map(p =>
+        `<option value="${p.slug}">${p.emoji} ${p.name}</option>`
+      ).join('');
+      select.innerHTML = '<option value="">— Pilih produk —</option>' + options;
+    }
+
+    function renderBatchList() {
+      const list = document.getElementById('batches-list');
+      if (!currentBatches.length) {
+        list.innerHTML = '<div class="loading-state">Belum ada batch di index.json</div>';
+        return;
+      }
+      list.innerHTML = currentBatches.map(b => {
+        const p = allProducts[b.productSlug] || {};
+        const label = (p.emoji || '🌱') + ' ' + (p.name || b.productSlug) + ' · ' + formatDate(b.plantedDate);
+        return `
+          <div class="product-row">
+            <div class="product-row-info">
+              <span class="product-row-emoji">${p.emoji || '🌱'}</span>
+              <div>
+                <p class="product-row-name">${p.name || b.productSlug}</p>
+                <p class="product-row-slug">${b.id} · tanam ${formatDate(b.plantedDate)}</p>
+              </div>
+            </div>
+            <button class="btn btn-sm" onclick="generateFromBatch('${b.id}', '${label}')">QR</button>
+          </div>
+        `;
+      }).join('');
+      document.getElementById('bulk-card').style.display = '';
     }
 
     function generateBulk() {
-      if (!currentProducts.length) return;
+      if (!currentBatches.length) return;
       const sheet = document.getElementById('print-sheet');
-      const baseUrl = getBaseUrl();
-      const tempDivs = [];
-
       sheet.innerHTML = '<div class="print-grid" id="bulk-grid"></div>';
       const grid = document.getElementById('bulk-grid');
 
-      currentProducts.forEach(p => {
+      currentBatches.forEach(b => {
+        const p = allProducts[b.productSlug] || {};
         const item = document.createElement('div');
         item.className = 'print-item';
         const qrDiv = document.createElement('div');
-        qrDiv.id = 'bulk-qr-' + p.slug;
         item.appendChild(qrDiv);
         const nameP = document.createElement('p');
         nameP.style.fontWeight = '700';
-        nameP.textContent = p.name;
+        nameP.textContent = (p.emoji || '') + ' ' + (p.name || b.productSlug);
         const urlP = document.createElement('p');
-        urlP.textContent = buildUrl(p.slug);
+        urlP.textContent = buildUrl(b.id);
         item.appendChild(nameP);
         item.appendChild(urlP);
         grid.appendChild(item);
-        renderQR(qrDiv, buildUrl(p.slug), 140);
+        renderQR(qrDiv, buildUrl(b.id), 140);
       });
 
       setTimeout(() => window.print(), 600);
@@ -377,11 +417,9 @@
 
     document.getElementById('base-url').addEventListener('input', () => {
       updatePreview();
-      loadProducts();
     });
 
-    updatePreview();
-    loadProducts();
+    loadData();
   </script>
 </body>
 </html>
