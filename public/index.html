@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Microgreens by Ucops</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Lora:ital,wght@0,500;1,400&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+
+  <div id="app">
+    <div class="loading-screen">
+      <div class="loading-leaf">🌱</div>
+      <p>Memuat info produk…</p>
+    </div>
+  </div>
+
+  <script>
+    const CONFIG_URL = '../data/config.json';
+    const INDEX_URL = '../data/index.json';
+    const BATCH_URL_PREFIX = '../data/batches/';
+
+    function getSlug() {
+      const params = new URLSearchParams(window.location.search);
+      const slug = params.get('p') || params.get('product') || params.get('slug');
+      if (slug) return slug;
+      const path = window.location.pathname;
+      const match = path.match(/\/([^\/]+)\/?$/);
+      return match ? match[1] : null;
+    }
+
+    async function loadJSON(url) {
+      const res = await fetch(url);
+      if (!res.ok) throw new Error(`Failed to load ${url}`);
+      return await res.json();
+    }
+
+    function formatDate(dateStr) {
+      if (!dateStr) return '—';
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('id-ID', { day: 'numeric', month: 'long', year: 'numeric' });
+    }
+
+    function daysLeft(expiryStr) {
+      if (!expiryStr) return null;
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const exp = new Date(expiryStr + 'T00:00:00');
+      const diff = Math.round((exp - now) / (1000 * 60 * 60 * 24));
+      return diff;
+    }
+
+    function plantAge(plantedDateStr) {
+      if (!plantedDateStr) return null;
+      const now = new Date();
+      now.setHours(0, 0, 0, 0);
+      const planted = new Date(plantedDateStr + 'T00:00:00');
+      const diff = Math.round((now - planted) / (1000 * 60 * 60 * 24));
+      return diff;
+    }
+
+    function bestHarvestRange(plantedDateStr, rangeStr) {
+      if (!plantedDateStr || !rangeStr) return '—';
+      const [minDays, maxDays] = rangeStr.split('-').map(s => parseInt(s.trim()));
+      if (isNaN(minDays) || isNaN(maxDays)) return '—';
+
+      const planted = new Date(plantedDateStr + 'T00:00:00');
+      const startDate = new Date(planted);
+      startDate.setDate(planted.getDate() + minDays);
+      const endDate = new Date(planted);
+      endDate.setDate(planted.getDate() + maxDays);
+
+      const startDay = startDate.getDate();
+      const startMonth = startDate.toLocaleDateString('id-ID', { month: 'long' });
+      const endDay = endDate.getDate();
+      const endMonth = endDate.toLocaleDateString('id-ID', { month: 'long' });
+      const year = endDate.getFullYear();
+
+      if (startMonth === endMonth) {
+        return `${startDay} s/d ${endDay} ${endMonth} ${year}`;
+      } else {
+        return `${startDay} ${startMonth} s/d ${endDay} ${endMonth} ${year}`;
+      }
+    }
+
+    function freshnessLabel(days) {
+      if (days === null) return { text: '—', cls: '' };
+      if (days < 0) return { text: 'Sudah lewat tanggal', cls: 'expired' };
+      if (days === 0) return { text: 'Habis hari ini', cls: 'warning' };
+      if (days <= 2) return { text: `${days} hari lagi`, cls: 'warning' };
+      return { text: `Segar — ${days} hari lagi`, cls: 'fresh' };
+    }
+
+    function renderProduct(product, batch, brand) {
+      const accentColor = product.color || '#3B6D11';
+      const age = plantAge(batch.plantedDate);
+      const harvestRange = bestHarvestRange(batch.plantedDate, batch.bestHarvestDays);
+
+      return `
+        <div class="page" style="--accent: ${accentColor};">
+          <header class="top-bar">
+            <div class="brand-badge">
+              <span class="brand-leaf">🌱</span>
+              <span>${brand.name}</span>
+            </div>
+          </header>
+
+          <section class="hero">
+            <div class="hero-emoji">${product.emoji}</div>
+            <div class="hero-text">
+              <p class="product-category">Microgreens · ${product.nameid}</p>
+              <h1 class="product-name">${product.name}</h1>
+              <p class="product-desc">${product.description}</p>
+            </div>
+          </section>
+
+          <section class="batch-card">
+            <div class="batch-header">
+              <span class="batch-label">Info Batch</span>
+              <span class="batch-id">${batch.batchId || '—'}</span>
+            </div>
+            <div class="batch-grid">
+              <div class="batch-item">
+                <span class="bi-label">Ditanam</span>
+                <span class="bi-value">${formatDate(batch.plantedDate)}</span>
+              </div>
+              <div class="batch-item">
+                <span class="bi-label">Umur tanaman</span>
+                <span class="bi-value">${age !== null ? age + ' hari' : '—'}</span>
+              </div>
+              <div class="batch-item">
+                <span class="bi-label">Ukuran pot</span>
+                <span class="bi-value">${batch.potSize || '—'}</span>
+              </div>
+              <div class="batch-item">
+                <span class="bi-label">Media tanam</span>
+                <span class="bi-value">${batch.growthMedium || '—'}</span>
+              </div>
+              <div class="batch-item">
+                <span class="bi-label">Berat total</span>
+                <span class="bi-value">${batch.totalWeight || '—'}</span>
+              </div>
+              <div class="batch-item">
+                <span class="bi-label">Estimasi hasil</span>
+                <span class="bi-value">${batch.estimatedYield || '—'}</span>
+              </div>
+            </div>
+            ${batch.notes ? `<p class="batch-notes">📝 ${batch.notes}</p>` : ''}
+            ${batch.currentStatus ? `
+              <div class="status-row">
+                <span class="status-label">Status:</span>
+                <span class="status-value">${batch.currentStatus}</span>
+              </div>
+            ` : ''}
+            <div class="harvest-info">
+              <div>
+                <span class="bi-label">Waktu terbaik panen</span>
+                <span class="bi-value">${harvestRange}</span>
+              </div>
+              <div>
+                <span class="bi-label">Durasi panen</span>
+                <span class="bi-value">${batch.harvestDuration || '—'}</span>
+              </div>
+            </div>
+          </section>
+
+          <section class="section-block">
+            <h2 class="section-title">🌿 Cara Merawat Tanaman</h2>
+            <p class="care-method">${product.care?.method || ''}</p>
+
+            <div class="care-detail">
+              <h3 class="care-subtitle">💧 Penyiraman</h3>
+              <p class="care-frequency">${product.care?.watering?.frequency || ''}</p>
+              <p class="care-desc">${product.care?.watering?.method || ''}</p>
+            </div>
+
+            <div class="care-detail">
+              <h3 class="care-subtitle">☀️ Cahaya</h3>
+              <p class="care-frequency">${product.care?.light?.type || ''}</p>
+              <p class="care-desc">${product.care?.light?.duration || ''} · ${product.care?.light?.location || ''}</p>
+            </div>
+
+            <div class="care-detail">
+              <h3 class="care-subtitle">🌡️ Suhu</h3>
+              <p class="care-desc">${product.care?.temperature || ''}</p>
+            </div>
+
+            <ul class="care-tips">
+              ${(product.care?.tips || []).map(t => `<li>${t}</li>`).join('')}
+            </ul>
+          </section>
+
+          <section class="section-block">
+            <h2 class="section-title">✂️ Cara Panen</h2>
+            <div class="harvest-detail">
+              <p class="harvest-ready"><strong>Siap panen:</strong> ${product.harvesting?.readyAfter || ''}</p>
+              <p class="harvest-method"><strong>Metode:</strong> ${product.harvesting?.method || ''}</p>
+              <p class="harvest-frequency"><strong>Frekuensi:</strong> ${product.harvesting?.frequency || ''}</p>
+              <p class="harvest-yield"><strong>Total hasil:</strong> ${product.harvesting?.yield || ''}</p>
+              <p class="harvest-time"><strong>Waktu terbaik:</strong> ${product.harvesting?.bestTime || ''}</p>
+            </div>
+            <ul class="harvest-tips">
+              ${(product.harvesting?.tips || []).map(t => `<li>${t}</li>`).join('')}
+            </ul>
+          </section>
+
+          <section class="section-block">
+            <h2 class="section-title">⚡ Kandungan Nutrisi</h2>
+            <p class="nutrition-highlight">${product.nutrition?.highlight || ''}</p>
+            <div class="nutrition-grid">
+              ${(product.nutrition?.per100g || []).map(n => `
+                <div class="nutrition-item">
+                  <span class="ni-label">${n.label}</span>
+                  <span class="ni-value">${n.value}</span>
+                </div>
+              `).join('')}
+            </div>
+            <p class="nutrition-note">Per 100g · nilai perkiraan</p>
+          </section>
+
+          <section class="section-block">
+            <h2 class="section-title">🍽️ Cocok Untuk</h2>
+            <div class="usage-grid">
+              ${(product.usage || []).map(u => `
+                <div class="usage-item">
+                  <span class="usage-emoji">${u.icon}</span>
+                  <span class="usage-label">${u.label}</span>
+                </div>
+              `).join('')}
+            </div>
+          </section>
+
+          <footer class="footer">
+            <div class="footer-brand">
+              <p class="footer-name">${brand.name}</p>
+              <p class="footer-loc">📍 ${brand.location}</p>
+            </div>
+            ${brand.ig ? `<a class="footer-ig" href="https://instagram.com/${brand.ig}" target="_blank">@${brand.ig}</a>` : ''}
+          </footer>
+        </div>
+      `;
+    }
+
+    function renderNotFound(slug, brand) {
+      return `
+        <div class="page">
+          <header class="top-bar">
+            <div class="brand-badge">
+              <span class="brand-leaf">🌱</span>
+              <span>${brand.name}</span>
+            </div>
+          </header>
+          <section class="not-found">
+            <div class="nf-emoji">🔍</div>
+            <h1>Produk tidak ditemukan</h1>
+            <p>Tidak ada produk dengan kode <code>${slug || '?'}</code>.</p>
+            <p>Cek apakah QR code terbaca dengan benar, atau hubungi kami.</p>
+          </section>
+        </div>
+      `;
+    }
+
+    function renderIndex(config, index) {
+      const { brand, products } = config;
+      const batches = index.batches || [];
+      return `
+        <div class="page index-page">
+          <header class="top-bar">
+            <div class="brand-badge">
+              <span class="brand-leaf">🌱</span>
+              <span>${brand.name}</span>
+            </div>
+          </header>
+          <section class="hero" style="--accent: #3B6D11;">
+            <div class="hero-emoji">🌱</div>
+            <div class="hero-text">
+              <h1 class="product-name" style="font-size: 1.5rem;">${brand.name}</h1>
+              <p class="product-desc">${brand.tagline}</p>
+            </div>
+          </section>
+          <section class="section-block">
+            <h2 class="section-title">🪴 Produk Kami</h2>
+            <div class="product-list">
+              ${batches.map(batch => {
+                const product = products[batch.productSlug];
+                if (!product) return '';
+                return `
+                  <a class="product-card" href="?p=${batch.id}" style="--accent: ${product.color || '#3B6D11'};">
+                    <span class="pc-emoji">${product.emoji}</span>
+                    <div>
+                      <p class="pc-name">${product.name}</p>
+                      <p class="pc-sub">Ditanam ${formatDate(batch.plantedDate)}</p>
+                    </div>
+                  </a>
+                `;
+              }).join('')}
+            </div>
+          </section>
+          <footer class="footer">
+            <div class="footer-brand">
+              <p class="footer-name">${brand.name}</p>
+              <p class="footer-loc">📍 ${brand.location}</p>
+            </div>
+            ${brand.ig ? `<a class="footer-ig" href="https://instagram.com/${brand.ig}" target="_blank">@${brand.ig}</a>` : ''}
+          </footer>
+        </div>
+      `;
+    }
+
+    async function init() {
+      const app = document.getElementById('app');
+      let config;
+
+      try {
+        config = await loadJSON(CONFIG_URL);
+      } catch (e) {
+        app.innerHTML = '<div class="page"><section class="not-found"><div class="nf-emoji">⚠️</div><h1>Gagal memuat data</h1><p>Coba refresh halaman ini.</p></section></div>';
+        return;
+      }
+
+      const slug = getSlug();
+
+      // Halaman index - tampilkan list produk
+      if (!slug || slug === 'index' || slug === '' || slug === 'index.html') {
+        try {
+          const index = await loadJSON(INDEX_URL);
+          app.innerHTML = renderIndex(config, index);
+        } catch (e) {
+          app.innerHTML = '<div class="page"><section class="not-found"><div class="nf-emoji">⚠️</div><h1>Gagal memuat data</h1><p>Coba refresh halaman ini.</p></section></div>';
+        }
+        return;
+      }
+
+      // Halaman batch - tampilkan detail produk + batch
+      try {
+        const batchFile = `${BATCH_URL_PREFIX}${slug}.json`;
+        const batch = await loadJSON(batchFile);
+        const product = config.products[batch.productSlug];
+
+        if (!product) {
+          app.innerHTML = renderNotFound(slug, config.brand);
+          return;
+        }
+
+        document.title = `${product.name} · ${config.brand.name}`;
+        app.innerHTML = renderProduct(product, batch, config.brand);
+      } catch (e) {
+        app.innerHTML = renderNotFound(slug, config.brand);
+      }
+    }
+
+    init();
+  </script>
+</body>
+</html>

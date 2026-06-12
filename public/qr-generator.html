@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>QR Generator · Ucops Admin</title>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background: #f4f7f4;
+      color: #1a1a18;
+      padding: 2rem 1rem;
+    }
+    .container { max-width: 640px; margin: 0 auto; }
+    h1 {
+      font-size: 1.25rem;
+      font-weight: 700;
+      margin-bottom: 0.25rem;
+    }
+    .subtitle {
+      font-size: 0.875rem;
+      color: #666;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: #fff;
+      border-radius: 16px;
+      border: 1px solid rgba(0,0,0,0.08);
+      padding: 1.5rem;
+      margin-bottom: 1.5rem;
+    }
+    .card h2 {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      color: #999;
+      margin-bottom: 1rem;
+    }
+    label {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #555;
+      margin-bottom: 0.35rem;
+    }
+    input[type=text], select, textarea {
+      width: 100%;
+      padding: 0.625rem 0.875rem;
+      border: 1.5px solid rgba(0,0,0,0.12);
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: 0.875rem;
+      color: #1a1a18;
+      background: #fff;
+      outline: none;
+      margin-bottom: 1rem;
+      transition: border-color 0.15s;
+    }
+    input[type=text]:focus, select:focus { border-color: #2d6a2d; }
+    .url-preview {
+      padding: 0.75rem 1rem;
+      background: #f4f9f0;
+      border: 1.5px solid #2d6a2d;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-family: monospace;
+      color: #2d6a2d;
+      word-break: break-all;
+      margin-bottom: 1.25rem;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.75rem 1.5rem;
+      background: #2d6a2d;
+      color: #fff;
+      font-family: inherit;
+      font-size: 0.875rem;
+      font-weight: 600;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+    .btn:hover { background: #1a4a1a; }
+    .btn-outline {
+      background: transparent;
+      color: #2d6a2d;
+      border: 1.5px solid #2d6a2d;
+    }
+    .btn-outline:hover { background: #f4f9f0; }
+    .btn-sm {
+      padding: 0.5rem 1rem;
+      font-size: 0.8rem;
+    }
+    .qr-output {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 1.25rem;
+    }
+    #qr-canvas {
+      border: 1px solid rgba(0,0,0,0.08);
+      border-radius: 12px;
+      padding: 1rem;
+      background: #fff;
+    }
+    .qr-label {
+      text-align: center;
+    }
+    .qr-label .name {
+      font-size: 1rem;
+      font-weight: 700;
+    }
+    .qr-label .slug {
+      font-size: 0.75rem;
+      color: #999;
+      font-family: monospace;
+    }
+    .qr-actions {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .products-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+    .product-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      background: #f9f9f7;
+      border-radius: 8px;
+      gap: 1rem;
+    }
+    .product-row-info {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+    .product-row-emoji { font-size: 1.25rem; }
+    .product-row-name { font-size: 0.875rem; font-weight: 600; }
+    .product-row-slug { font-size: 0.75rem; color: #999; font-family: monospace; }
+    .hidden { display: none; }
+    .loading-state {
+      text-align: center;
+      color: #999;
+      font-size: 0.875rem;
+      padding: 2rem;
+    }
+    .print-sheet {
+      display: none;
+    }
+    @media print {
+      body { background: white; padding: 0; }
+      .no-print { display: none !important; }
+      .print-sheet { display: block; }
+      .print-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        padding: 1rem;
+      }
+      .print-item {
+        text-align: center;
+        border: 1px solid #ddd;
+        padding: 0.75rem;
+        border-radius: 8px;
+      }
+      .print-item canvas { display: block; margin: 0 auto 0.5rem; }
+      .print-item p { font-size: 10px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container no-print">
+    <div style="margin-bottom: 2rem;">
+      <h1>🌱 QR Generator · Ucops</h1>
+      <p class="subtitle">Generate QR code untuk setiap produk/batch microgreens</p>
+    </div>
+
+    <div class="card">
+      <h2>Konfigurasi URL</h2>
+      <label>Base URL website kamu</label>
+      <input type="text" id="base-url" placeholder="https://ucops.id" value="https://ucops.id" />
+      <label>Path halaman produk</label>
+      <input type="text" id="path" value="/microgreens/" />
+    </div>
+
+    <div class="card">
+      <h2>Generate QR — Dari Daftar Produk</h2>
+      <div id="products-list" class="products-list">
+        <div class="loading-state">⏳ Memuat data produk…</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>Generate QR — Manual</h2>
+      <label>Nama produk (untuk label)</label>
+      <input type="text" id="manual-name" placeholder="Sunflower Microgreens" />
+      <label>Slug / kode produk</label>
+      <input type="text" id="manual-slug" placeholder="sunflower" oninput="updatePreview()" />
+      <div class="url-preview" id="url-preview">—</div>
+      <button class="btn" onclick="generateManual()">⚡ Generate QR</button>
+    </div>
+
+    <div class="card" id="qr-result-card" style="display:none;">
+      <h2>Hasil QR Code</h2>
+      <div class="qr-output">
+        <div id="qr-canvas"></div>
+        <div class="qr-label">
+          <p class="name" id="qr-product-name"></p>
+          <p class="slug" id="qr-product-url"></p>
+        </div>
+        <div class="qr-actions">
+          <button class="btn btn-sm" onclick="downloadQR()">⬇️ Download PNG</button>
+          <button class="btn btn-outline btn-sm" onclick="window.print()">🖨️ Print</button>
+          <button class="btn btn-outline btn-sm" onclick="copyURL()">📋 Copy URL</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card" id="bulk-card" style="display:none;">
+      <h2>Print semua sekaligus</h2>
+      <p style="font-size: 0.875rem; color: #666; margin-bottom: 1rem;">
+        Setelah load produk dari JSON, kamu bisa print semua QR sekaligus untuk dipotong dan ditempel di packaging.
+      </p>
+      <button class="btn" onclick="generateBulk()">🖨️ Siapkan Sheet Print</button>
+    </div>
+  </div>
+
+  <div class="print-sheet" id="print-sheet"></div>
+
+  <script>
+    const DATA_URL = '../data/products.json';
+    let currentProducts = [];
+    let lastQRUrl = '';
+    let lastQRName = '';
+
+    function getBaseUrl() {
+      return (document.getElementById('base-url').value || '').replace(/\/$/, '');
+    }
+    function getPath() {
+      const p = document.getElementById('path').value || '/';
+      return p.endsWith('/') ? p : p + '/';
+    }
+    function buildUrl(slug) {
+      return getBaseUrl() + '?p=' + slug;
+    }
+
+    function updatePreview() {
+      const slug = document.getElementById('manual-slug').value.trim();
+      const url = slug ? buildUrl(slug) : '—';
+      document.getElementById('url-preview').textContent = url;
+    }
+
+    function renderQR(container, url, size = 220) {
+      container.innerHTML = '';
+      new QRCode(container, {
+        text: url,
+        width: size,
+        height: size,
+        colorDark: '#1a3a1a',
+        colorLight: '#ffffff',
+        correctLevel: QRCode.CorrectLevel.M
+      });
+    }
+
+    function showResult(name, url) {
+      lastQRUrl = url;
+      lastQRName = name;
+      const resultCard = document.getElementById('qr-result-card');
+      resultCard.style.display = '';
+      document.getElementById('qr-product-name').textContent = name;
+      document.getElementById('qr-product-url').textContent = url;
+      const canvas = document.getElementById('qr-canvas');
+      renderQR(canvas, url, 240);
+      resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+
+    function generateManual() {
+      const name = document.getElementById('manual-name').value.trim() || 'Produk';
+      const slug = document.getElementById('manual-slug').value.trim();
+      if (!slug) return alert('Masukkan slug produk dulu');
+      showResult(name, buildUrl(slug));
+    }
+
+    function downloadQR() {
+      setTimeout(() => {
+        const canvas = document.querySelector('#qr-canvas canvas');
+        if (!canvas) return alert('QR belum di-generate');
+        const link = document.createElement('a');
+        link.download = `qr-${lastQRName.toLowerCase().replace(/\s+/g, '-')}.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+      }, 100);
+    }
+
+    function copyURL() {
+      navigator.clipboard.writeText(lastQRUrl)
+        .then(() => alert('URL disalin: ' + lastQRUrl))
+        .catch(() => prompt('Copy URL ini:', lastQRUrl));
+    }
+
+    async function loadProducts() {
+      const list = document.getElementById('products-list');
+      try {
+        const res = await fetch(DATA_URL);
+        const data = await res.json();
+        currentProducts = data.products || [];
+
+        if (!currentProducts.length) {
+          list.innerHTML = '<div class="loading-state">Tidak ada produk ditemukan di products.json</div>';
+          return;
+        }
+
+        list.innerHTML = currentProducts.map(p => `
+          <div class="product-row">
+            <div class="product-row-info">
+              <span class="product-row-emoji">${p.emoji}</span>
+              <div>
+                <p class="product-row-name">${p.name}</p>
+                <p class="product-row-slug">${buildUrl(p.slug)}</p>
+              </div>
+            </div>
+            <button class="btn btn-sm" onclick="generateFromProduct('${p.slug}', '${p.name}')">QR</button>
+          </div>
+        `).join('');
+
+        document.getElementById('bulk-card').style.display = '';
+      } catch (e) {
+        list.innerHTML = '<div class="loading-state">⚠️ Gagal load products.json — pastikan server berjalan</div>';
+      }
+    }
+
+    function generateFromProduct(slug, name) {
+      showResult(name, buildUrl(slug));
+    }
+
+    function generateBulk() {
+      if (!currentProducts.length) return;
+      const sheet = document.getElementById('print-sheet');
+      const baseUrl = getBaseUrl();
+      const tempDivs = [];
+
+      sheet.innerHTML = '<div class="print-grid" id="bulk-grid"></div>';
+      const grid = document.getElementById('bulk-grid');
+
+      currentProducts.forEach(p => {
+        const item = document.createElement('div');
+        item.className = 'print-item';
+        const qrDiv = document.createElement('div');
+        qrDiv.id = 'bulk-qr-' + p.slug;
+        item.appendChild(qrDiv);
+        const nameP = document.createElement('p');
+        nameP.style.fontWeight = '700';
+        nameP.textContent = p.name;
+        const urlP = document.createElement('p');
+        urlP.textContent = buildUrl(p.slug);
+        item.appendChild(nameP);
+        item.appendChild(urlP);
+        grid.appendChild(item);
+        renderQR(qrDiv, buildUrl(p.slug), 140);
+      });
+
+      setTimeout(() => window.print(), 600);
+    }
+
+    document.getElementById('base-url').addEventListener('input', () => {
+      updatePreview();
+      loadProducts();
+    });
+
+    updatePreview();
+    loadProducts();
+  </script>
+</body>
+</html>

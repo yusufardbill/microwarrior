@@ -1,0 +1,140 @@
+{
+  "brand": {
+    "name": "Microgreens by Ucops",
+    "tagline": "Segar dari kebun kecil kami, langsung ke meja makanmu",
+    "location": "Jagakarsa, Jakarta Selatan",
+    "contact": "wa.me/628xxx",
+    "ig": "ucops.microgreens"
+  },
+  "products": [
+    {
+      "slug": "sunflower",
+      "name": "Sunflower Microgreens",
+      "nameid": "Bunga Matahari",
+      "emoji": "🌻",
+      "color": "#5C8A3C",
+      "description": "Microgreens bunga matahari dengan rasa gurih dan sedikit nutty. Tekstur renyah, cocok sebagai topping salad, sandwich, atau smoothie.",
+      "batches": [
+        {
+          "batchId": "SF-2024-001",
+          "plantedDate": "2024-12-28",
+          "expiryDate": "2025-01-12",
+          "bestHarvestDays": "8-12",
+          "weight": "100g",
+          "notes": "Batch pertama musim hujan — tumbuh sempurna"
+        }
+      ],
+      "nutrition": {
+        "highlight": "Tinggi Vitamin E & zinc",
+        "per100g": [
+          { "label": "Protein", "value": "3.8g" },
+          { "label": "Serat", "value": "1.9g" },
+          { "label": "Vitamin E", "value": "21% AKG" },
+          { "label": "Zinc", "value": "15% AKG" }
+        ]
+      },
+      "storage": {
+        "method": "Simpan di kulkas, jangan dicuci sebelum dipakai",
+        "maxDays": 5,
+        "tips": [
+          "Masukkan ke wadah tertutup/plastik zip-lock",
+          "Taruh di bagian paling dingin kulkas (bukan freezer)",
+          "Cuci dengan air dingin sesaat sebelum dikonsumsi",
+          "Jangan terkena air terlalu lama — bisa cepat layu"
+        ]
+      },
+      "usage": [
+        { "icon": "🥗", "label": "Salad & bowl" },
+        { "icon": "🥪", "label": "Sandwich & wrap" },
+        { "icon": "🍳", "label": "Topping telur" },
+        { "icon": "🥤", "label": "Green smoothie" }
+      ]
+    },
+    {
+      "slug": "radish",
+      "name": "Radish Microgreens",
+      "nameid": "Lobak",
+      "emoji": "🌱",
+      "color": "#C0392B",
+      "description": "Microgreens lobak dengan rasa pedas segar yang khas. Daun merah muda dan hijau yang cantik, kaya antioksidan.",
+      "batches": [
+        {
+          "batchId": "RD-2024-001",
+          "plantedDate": "2024-12-30",
+          "expiryDate": "2025-01-10",
+          "bestHarvestDays": "5-7",
+          "weight": "100g",
+          "notes": "Varietas daikon — ekstra pedas"
+        }
+      ],
+      "nutrition": {
+        "highlight": "Tinggi Vitamin C & antioksidan",
+        "per100g": [
+          { "label": "Protein", "value": "2.5g" },
+          { "label": "Vitamin C", "value": "29% AKG" },
+          { "label": "Folat", "value": "18% AKG" },
+          { "label": "Kalium", "value": "10% AKG" }
+        ]
+      },
+      "storage": {
+        "method": "Simpan di kulkas, konsumsi dalam 5 hari",
+        "maxDays": 5,
+        "tips": [
+          "Bungkus dengan kertas dapur lembap, lalu masuk plastik",
+          "Simpan di laci sayur kulkas",
+          "Cuci tepat sebelum dikonsumsi",
+          "Hindari terkena ethylene (jauh dari pisang/apel)"
+        ]
+      },
+      "usage": [
+        { "icon": "🍜", "label": "Ramen & soto" },
+        { "icon": "🥗", "label": "Salad asia" },
+        { "icon": "🍣", "label": "Sushi & poke" },
+        { "icon": "🥪", "label": "Topping sandwich" }
+      ]
+    },
+    {
+      "slug": "peas",
+      "name": "Pea Shoots",
+      "nameid": "Kacang Polong",
+      "emoji": "🫛",
+      "color": "#27AE60",
+      "description": "Tunas kacang polong muda yang manis dan segar. Aroma seperti kacang polong matang, sangat versatile di dapur.",
+      "batches": [
+        {
+          "batchId": "PS-2025-001",
+          "plantedDate": "2025-01-02",
+          "expiryDate": "2025-01-17",
+          "bestHarvestDays": "9-12",
+          "weight": "100g",
+          "notes": "Batch segar awal tahun"
+        }
+      ],
+      "nutrition": {
+        "highlight": "Tinggi Vitamin A & C",
+        "per100g": [
+          { "label": "Protein", "value": "3.4g" },
+          { "label": "Vitamin A", "value": "35% AKG" },
+          { "label": "Vitamin C", "value": "25% AKG" },
+          { "label": "Besi", "value": "12% AKG" }
+        ]
+      },
+      "storage": {
+        "method": "Simpan di kulkas, tahan 7 hari",
+        "maxDays": 7,
+        "tips": [
+          "Taruh di wadah dengan sedikit sirkulasi udara",
+          "Jangan ditekan atau ditumpuk",
+          "Simpan jauh dari bahan berbau kuat",
+          "Bisa dikonsumsi mentah atau ditumis sebentar"
+        ]
+      },
+      "usage": [
+        { "icon": "🥘", "label": "Tumisan & stir-fry" },
+        { "icon": "🍜", "label": "Sup & mie" },
+        { "icon": "🥗", "label": "Salad segar" },
+        { "icon": "🍳", "label": "Omelette & telur" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,176 @@
+{
+  "brand": {
+    "name": "Microgreens by Ucops",
+    "tagline": "Segar dari kebun kecil kami, langsung ke meja makanmu",
+    "location": "Jagakarsa, Jakarta Selatan",
+    "contact": "wa.me/628xxx",
+    "ig": "ucops.microgreens"
+  },
+  "products": {
+    "sunflower": {
+      "slug": "sunflower",
+      "name": "Sunflower Microgreens",
+      "nameid": "Bunga Matahari",
+      "emoji": "🌻",
+      "color": "#5C8A3C",
+      "description": "Microgreens bunga matahari dengan rasa gurih dan sedikit nutty. Tekstur renyah, cocok sebagai topping salad, sandwich, atau smoothie.",
+      "nutrition": {
+        "highlight": "Tinggi Vitamin E & zinc",
+        "per100g": [
+          { "label": "Protein", "value": "3.8g" },
+          { "label": "Serat", "value": "1.9g" },
+          { "label": "Vitamin E", "value": "21% AKG" },
+          { "label": "Zinc", "value": "15% AKG" }
+        ]
+      },
+      "care": {
+        "method": "Taruh di tempat terang, siram rutin",
+        "watering": {
+          "frequency": "1-2x sehari",
+          "method": "Siram dari bawah (rendam pot 5-10 menit) atau spray halus"
+        },
+        "light": {
+          "type": "Cahaya terang tidak langsung",
+          "duration": "4-6 jam per hari",
+          "location": "Dekat jendela atau area terang indoor"
+        },
+        "temperature": "20-25°C (suhu ruangan nyaman)",
+        "tips": [
+          "Media tanam harus selalu lembap, tidak becek",
+          "Hindari sinar matahari langsung (bisa gosong)",
+          "Rotasi pot tiap hari agar tumbuh merata",
+          "Jika daun mulai kuning, kurangi air"
+        ]
+      },
+      "harvesting": {
+        "readyAfter": "8-12 hari setelah tanam",
+        "method": "Cut & come again - potong bagian atas, sisakan 2-3cm dari media",
+        "frequency": "Bisa panen 2-3 kali dari satu pot",
+        "yield": "150-200g total dari satu pot",
+        "bestTime": "Pagi hari setelah siram",
+        "tips": [
+          "Gunakan gunting bersih untuk panen",
+          "Potong saat tinggi 8-10cm untuk rasa terbaik",
+          "Setelah panen pertama, beri jeda 3-4 hari",
+          "Konsumsi langsung setelah potong untuk kesegaran maksimal"
+        ]
+      },
+      "usage": [
+        { "icon": "🥗", "label": "Salad & bowl" },
+        { "icon": "🥪", "label": "Sandwich & wrap" },
+        { "icon": "🍳", "label": "Topping telur" },
+        { "icon": "🥤", "label": "Green smoothie" }
+      ]
+    },
+    "radish": {
+      "slug": "radish",
+      "name": "Radish Microgreens",
+      "nameid": "Lobak",
+      "emoji": "🌱",
+      "color": "#C0392B",
+      "description": "Microgreens lobak dengan rasa pedas segar yang khas. Daun merah muda dan hijau yang cantik, kaya antioksidan.",
+      "nutrition": {
+        "highlight": "Tinggi Vitamin C & antioksidan",
+        "per100g": [
+          { "label": "Protein", "value": "2.5g" },
+          { "label": "Vitamin C", "value": "29% AKG" },
+          { "label": "Folat", "value": "18% AKG" },
+          { "label": "Kalium", "value": "10% AKG" }
+        ]
+      },
+      "care": {
+        "method": "Tempat terang, siram sering, tumbuh cepat",
+        "watering": {
+          "frequency": "2x sehari (pagi & sore)",
+          "method": "Spray halus atau siram dari bawah hingga media basah merata"
+        },
+        "light": {
+          "type": "Cahaya terang, bisa full sun 2-3 jam",
+          "duration": "6-8 jam per hari",
+          "location": "Area paling terang di rumah, boleh outdoor pagi/sore"
+        },
+        "temperature": "18-24°C (lebih suka sejuk)",
+        "tips": [
+          "Radish suka air, jangan sampai kering",
+          "Warna merah/pink muncul saat kena cahaya cukup",
+          "Pertumbuhan cepat, pantau tiap hari",
+          "Kalau terlalu rapat, bisa tipiskan (thinning)"
+        ]
+      },
+      "harvesting": {
+        "readyAfter": "5-7 hari setelah tanam",
+        "method": "Potong di atas media, sisakan 1-2cm. Bisa tumbuh lagi 1-2x",
+        "frequency": "Panen 2x dari satu pot (panen ke-2 lebih tipis)",
+        "yield": "120-180g total dari satu pot",
+        "bestTime": "Pagi hari saat rasa paling mild",
+        "tips": [
+          "Panen saat tinggi 6-8cm untuk rasa optimal",
+          "Makin tua makin pedas - sesuaikan selera",
+          "Cuci bersih sebelum konsumsi (bisa ada sisa media)",
+          "Batang & daun semua bisa dimakan"
+        ]
+      },
+      "usage": [
+        { "icon": "🍜", "label": "Ramen & soto" },
+        { "icon": "🥗", "label": "Salad asia" },
+        { "icon": "🍣", "label": "Sushi & poke" },
+        { "icon": "🥪", "label": "Topping sandwich" }
+      ]
+    },
+    "peas": {
+      "slug": "peas",
+      "name": "Pea Shoots",
+      "nameid": "Kacang Polong",
+      "emoji": "🫛",
+      "color": "#27AE60",
+      "description": "Tunas kacang polong muda yang manis dan segar. Aroma seperti kacang polong matang, sangat versatile di dapur.",
+      "nutrition": {
+        "highlight": "Tinggi Vitamin A & C",
+        "per100g": [
+          { "label": "Protein", "value": "3.4g" },
+          { "label": "Vitamin A", "value": "35% AKG" },
+          { "label": "Vitamin C", "value": "25% AKG" },
+          { "label": "Besi", "value": "12% AKG" }
+        ]
+      },
+      "care": {
+        "method": "Cahaya sedang, siram cukup, butuh support",
+        "watering": {
+          "frequency": "1-2x sehari, cek media",
+          "method": "Siram merata, jangan genang. Pea shoots butuh drainase baik"
+        },
+        "light": {
+          "type": "Cahaya sedang hingga terang",
+          "duration": "4-6 jam per hari",
+          "location": "Indoor terang atau outdoor teduh parsial"
+        },
+        "temperature": "18-22°C (suka sejuk)",
+        "tips": [
+          "Tunas akan merambat - bisa kasih support kecil",
+          "Jangan terlalu basah - rawan jamur di batang",
+          "Akar kuat, media harus padat agar tidak roboh",
+          "Daun yang terlalu besar bisa dipangkas"
+        ]
+      },
+      "harvesting": {
+        "readyAfter": "9-12 hari setelah tanam",
+        "method": "Petik tunas pucuk + 2-3 daun. Akan tumbuh tunas samping baru",
+        "frequency": "Panen bertahap 3-4x dalam 2-3 minggu",
+        "yield": "180-250g total dari satu pot",
+        "bestTime": "Kapan saja, pagi lebih renyah",
+        "tips": [
+          "Petik pucuk muda untuk rasa paling manis",
+          "Semakin sering dipetik, makin banyak tunas baru",
+          "Bisa dimakan mentah (manis) atau ditumis (gurih)",
+          "Batang bawah yang keras jangan dimakan"
+        ]
+      },
+      "usage": [
+        { "icon": "🥘", "label": "Tumisan & stir-fry" },
+        { "icon": "🍜", "label": "Sup & mie" },
+        { "icon": "🥗", "label": "Salad segar" },
+        { "icon": "🍳", "label": "Omelette & telur" }
+      ]
+    }
+  }
+}
