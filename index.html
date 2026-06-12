@@ -62,6 +62,18 @@
       return diff;
     }
 
+    function computeStatus(plantedDateStr, bestHarvestDaysStr) {
+      const age = plantAge(plantedDateStr);
+      if (age === null) return { text: '—', cls: '' };
+      const parts = (bestHarvestDaysStr || '').split('-').map(s => parseInt(s.trim()));
+      const min = isNaN(parts[0]) ? 7 : parts[0];
+      const max = isNaN(parts[1]) ? min + 3 : parts[1];
+      if (age <= 2)        return { text: '🌰 Masih Benih', cls: 'status--benih' };
+      if (age < min)       return { text: '🌱 Jangan Panen Dulu, Masih Sangat Muda', cls: 'status--muda' };
+      if (age <= max + 7)  return { text: '✅ Siap Panen', cls: 'status--siap' };
+      return               { text: '⏰ Sudah Lewat Masa Panen', cls: 'status--expired' };
+    }
+
     function bestHarvestRange(plantedDateStr, rangeStr) {
       if (!plantedDateStr || !rangeStr) return '—';
       const [minDays, maxDays] = rangeStr.split('-').map(s => parseInt(s.trim()));
@@ -98,6 +110,7 @@
       const accentColor = product.color || '#3B6D11';
       const age = plantAge(batch.plantedDate);
       const harvestRange = bestHarvestRange(batch.plantedDate, batch.bestHarvestDays);
+      const status = computeStatus(batch.plantedDate, batch.bestHarvestDays);
 
       return `
         <div class="page" style="--accent: ${accentColor};">
@@ -149,12 +162,10 @@
               </div>
             </div>
             ${batch.notes ? `<p class="batch-notes">📝 ${batch.notes}</p>` : ''}
-            ${batch.currentStatus ? `
-              <div class="status-row">
-                <span class="status-label">Status:</span>
-                <span class="status-value">${batch.currentStatus}</span>
-              </div>
-            ` : ''}
+            <div class="status-row ${status.cls}">
+              <span class="status-label">Status:</span>
+              <span class="status-value">${status.text}</span>
+            </div>
             <div class="harvest-info">
               <div>
                 <span class="bi-label">Waktu terbaik panen</span>

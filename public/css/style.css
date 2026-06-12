@@ -219,6 +219,14 @@ body {
   font-weight: 700;
   color: var(--green-mid);
 }
+.status--benih   { background: linear-gradient(90deg, #f0ede8 0%, #fff 100%); }
+.status--benih .status-value { color: #8a7560; }
+.status--muda    { background: linear-gradient(90deg, #fff8e1 0%, #fff 100%); }
+.status--muda .status-value  { color: #c47f00; }
+.status--siap    { background: linear-gradient(90deg, #e8f5e9 0%, #fff 100%); }
+.status--siap .status-value  { color: var(--green-mid); }
+.status--expired { background: linear-gradient(90deg, #fdecea 0%, #fff 100%); }
+.status--expired .status-value { color: #c0392b; }
 .harvest-info {
   display: flex;
   justify-content: space-between;
